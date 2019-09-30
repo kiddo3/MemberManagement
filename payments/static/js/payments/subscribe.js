@@ -1,4 +1,22 @@
 var stripe_integration_init = function(stripe_publishable_key) {
+    // make some thin wrappers around the stripe api
+    // which return faked id's when we do not have a publishable key
+
+    var create_token = function(data) {
+        if (!stripe_publishable_key)
+            return Promise.resolve({ token: { id: 'fake-token-id' } });
+        
+        return stripe.createToken(data);
+    }
+
+    var create_source = function(element, data) {
+        if (!stripe_publishable_key)
+            return Promise.resolve({ source: { id: 'fake-source-id' }});
+        
+        return stripe
+    }
+
+
     // create an error elemenet
     var errorElement = document.getElementById('card-errors');
     var set_error = function(message){
@@ -86,7 +104,7 @@ var stripe_integration_init = function(stripe_publishable_key) {
 
     // handle submitting a card
     var submitCard = function() {
-        stripe.createToken(card).then(function(result) {
+        create_token(card).then(function(result) {
             if (result.error) {
                 set_error(result.error.message);
                 return;
@@ -98,7 +116,7 @@ var stripe_integration_init = function(stripe_publishable_key) {
     
     // handle submitting a sepa token
     var submitSepa = function() {
-        stripe.createSource(iban, {
+        create_source(iban, {
             type: 'sepa_debit',
             currency: 'eur',
             owner: {
